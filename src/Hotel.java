@@ -46,6 +46,7 @@ public class Hotel {
      */
     public static void saveState(Hotel hotel) {
         try (FileWriter writer = new FileWriter(STATE_FILE)) {
+            writer.write("roomNumber,capacity\n");
             for (Room room : hotel.getRooms()) {
                 writer.write(room.getRoomNumber() + "," + room.getCapacity() + "\n");
             }
@@ -59,13 +60,21 @@ public class Hotel {
      * @param hotel the hotel to restore
      */
     public static void restoreState(Hotel hotel) {
-        hotel.getRooms().clear();
+        hotel.getRooms().clear(); // Clear existing rooms to prevent inconsistency
+
         try (BufferedReader reader = new BufferedReader(new FileReader(STATE_FILE))) {
             String line;
             while ((line = reader.readLine()) != null) {
+                // Skip the header line
+                if (line.equals("roomNumber,capacity")) {
+                    continue;
+                }
+
+                // Parse the room number and capacity
                 String[] parts = line.split(",");
                 int roomNumber = Integer.parseInt(parts[0]);
                 int capacity = Integer.parseInt(parts[1]);
+
                 Room room = new Room(roomNumber, capacity);
                 hotel.getRooms().add(room);
             }
